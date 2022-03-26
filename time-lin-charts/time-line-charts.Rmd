@@ -1,5 +1,5 @@
 ---
-title: "time-line-charts"
+title: "Time series charts"
 output: 
   html_document:
     keep_md: true
