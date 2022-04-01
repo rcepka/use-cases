@@ -32,32 +32,48 @@ crz_contracts_full_db <- tbl(con, in_schema("crz", "contracts"))
 
 # Total contracts, total sum, average contract size, highest contract,
 # most contracting entity, most contracted supplier,
-crz_contracts_summary_db <- crz_contracts_db %>%
-  summarise(ContractsAmount = sum(contract_price_amount),
-            AverageContract = mean(contract_price_amount),
-            Count = as.numeric(n()),
-            MinContract = min(contract_price_amount),
-            MaxContract = max(contract_price_amount, na.rm = TRUE),
-            MaxTotalContract = max(contract_price_total_amount, na.rm = TRUE),
+crz_contracts_summary_db <- crz_contracts_full_db %>%
+  summarise(ContractsAmount = sum(contract_price_total_amount),
+            AverageContract = mean(contract_price_total_amount),
+            AllContractsQuantity = as.numeric(n()),
+            MinContract = min(contract_price_total_amount),
+            MaxContract = max(contract_price_total_amount, na.rm = TRUE),
             Contractors = as.numeric(count(distinct(contracting_authority_cin_raw))),
-            Suppliers = as.numeric(count(distinct(supplier_cin_raw)))
+            Suppliers = as.numeric(count(distinct(supplier_cin_raw))),
+            MissingContractAmounts = as.numeric(count(is.na(contract_price_total_amount)))
             )
 # make it tibble
 crz_contracts_summary_tbl <- as_tibble(crz_contracts_summary_db)
 
 
 
-
 # All time top 25(50?) contractors by amount of contract->
-crz_top_contractors_by_amount_db <- crz_contracts_db %>%
+crz_top_contractors_by_amount_db <- crz_contracts_full_db %>%
   group_by(contracting_authority_name) %>%
-  summarise(Quantity = as.numeric(n()),
-            ContractPrice = sum(contract_price_total_amount),
-            ContractAmount = sum(contract_price_amount)) %>%
-  slice_max(ContractAmount, n = 5)
+  summarise(ContractsQuantity = as.numeric(n()),
+            ContractAmount = sum(contract_price_total_amount) / 1000, #in thousands of €
+            ) %>%
+  slice_max(ContractAmount, n = 25) %>%
+  mutate(
+    SumOfContracts = sum(ContractAmount)
+  )
 
-  crz_top_contractors_by_amount_tbl <- as_tibble(crz_top_contractors_by_amount_db)
-  add_row(crz_top_contractors_by_amount_tbl, contracting_authority_name = "All others", Quantity = as.numeric(crz_contracts_summary_tbl[1,2]) / 1000, ContractPrice = 555, ContractAmount = 666)
+# Make it a tibble for further operations
+crz_top_contractors_by_amount_tbl <- as_tibble(crz_top_contractors_by_amount_db)
+
+# Add sum of all contracts, this enables us to calculate the percentage
+crz_top_contractors_by_amount_tbl <- crz_top_contractors_by_amount_tbl %>%
+  rowwise() %>%
+  mutate(
+    Percentage = ContractAmount / SumOfContracts * 100 #in %
+  )
+
+#  add_row(
+#    contracting_authority_name = "All others",
+#    ContractsQuantity = as.numeric(crz_contracts_summary_tbl[1,2]) / 1000,
+#    ContractAmount = 555, ContractAmount = 666
+#    ) %>%
+
 
 
 
@@ -68,6 +84,38 @@ crz_top_contractors_by_amount_db <- crz_contracts_db %>%
 
 # All time top 25(50?) contractors by quantity of contract->
 crz_top_contractors_by_quantity_db
+
+crz_top_contractors_by_amount_db <- crz_contracts_full_db %>%
+  group_by(contracting_authority_name) %>%
+  summarise(Quantity = as.numeric(n()),
+            ContractPrice = sum(contract_price_total_amount),
+            ContractAmount = sum(contract_price_amount)
+  ) %>%
+  slice_max(ContractAmount, n = 5)
+
+# Make it a tibble for further operations
+crz_top_contractors_by_amount_tbl <- as_tibble(crz_top_contractors_by_amount_db)
+
+crz_top_contractors_by_amount_tbl <- mutate(crz_top_contractors_by_amount_tbl, sum = sum(ContractPrice))
+
+add_row(crz_top_contractors_by_amount_tbl, contracting_authority_name = "All others", Quantity = as.numeric(crz_contracts_summary_tbl[1,2]) / 1000, ContractPrice = 555, ContractAmount = 666)
+
+
+crz_top_contractors_by_amount_tbl <- crz_top_contractors_by_amount_tbl %>%
+  rowwise() %>%
+  mutate(Percentage = ContractPrice / sum)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Top 25(50?) contractors by years. For each year: contractor, quantity of contracts, amount of contracts.
