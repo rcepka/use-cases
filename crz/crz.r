@@ -7,6 +7,8 @@ library(DBI)
 library(odbc)
 library(RPostgres)
 library(keyring)
+library(ggplot2)
+library(treemap)
 #library(RPostgreSQL)
 
 # key_list("SK")
@@ -47,7 +49,9 @@ crz_contracts_summary_tbl <- as_tibble(crz_contracts_summary_db)
 
 
 
+
 # All time top 25(50?) contractors by amount of contract->
+#
 crz_top_contractors_by_amount_db <- crz_contracts_full_db %>%
   group_by(contracting_authority_name) %>%
   summarise(ContractsQuantity = as.numeric(n()),
@@ -56,7 +60,8 @@ crz_top_contractors_by_amount_db <- crz_contracts_full_db %>%
   slice_max(ContractAmount, n = 25) %>%
   mutate(
     SumOfContracts = sum(ContractAmount)
-  )
+  ) %>%
+  rename(Contractors = contracting_authority_name)
 
 # Make it a tibble for further operations
 crz_top_contractors_by_amount_tbl <- as_tibble(crz_top_contractors_by_amount_db)
@@ -69,10 +74,55 @@ crz_top_contractors_by_amount_tbl <- crz_top_contractors_by_amount_tbl %>%
   )
 
 #  add_row(
-#    contracting_authority_name = "All others",
+#    Contractors = "All others",
 #    ContractsQuantity = as.numeric(crz_contracts_summary_tbl[1,2]) / 1000,
 #    ContractAmount = 555, ContractAmount = 666
 #    ) %>%
+
+# Treemap chart
+treemap <- treemap(
+  crz_top_contractors_by_amount_tbl,
+  index="Contractors",
+  vSize="Percentage",
+  type="index"
+)
+
+
+
+
+# Histogram / Boxplot chart
+# Distribution of contract values
+crz_contracts_size_distribution_db <- crz_contracts_full_db %>%
+  select(
+    contract_price_total_amount,
+    effective_from
+  ) %>%
+  rename(
+    "Contract amount" = contract_price_total_amount,
+    "Date" = effective_from
+  ) %>%
+  arrange(desc(Date))
+
+# Make it tibble and other changes
+crz_contracts_size_distribution_tbl <- as_tibble(crz_contracts_size_distribution_db) %>%
+  drop_na() %>%
+  group_by(Date) %>%
+  summarise(
+    `Contract amount` = as.numeric(sum(`Contract amount`) / 1000) #in thousands of €
+  ) %>%
+  filter(
+    between(Date, as.Date('1999-01-01'), as.Date('2023-01-01')),
+    `Contract amount` > 0
+    )
+
+
+
+ggplot(data = crz_contracts_size_distribution_tbl, mapping = aes(x = Date, y = "Contract amount")) +
+  geom_line()
+
+
+
+
 
 
 
