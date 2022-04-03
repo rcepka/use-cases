@@ -78,11 +78,11 @@ ggplot(crz_top_contracts_tbl, aes(x=supplier_name, y=contract_price_total_amount
 
 
 # display table
-library(kableExtra)
-dt <- crz_top_contracts_tbl[1:5, 1:5]
-kbl(dt) %>%
-  kable_styling() %>%
-  kable_paper("hover", full_width = F)
+#library(kableExtra)
+#dt <- crz_top_contracts_tbl[1:5, 1:5]
+#kbl(dt) %>%
+ # kable_styling() %>%
+  #kable_paper("hover", full_width = F)
 
 
 
@@ -164,35 +164,21 @@ ggplot(data=crz_contracts_size_distribution_tbl, aes(x=Date, y=`Contract amount`
   geom_bar(stat="identity")
 
 
-library(dygraphs)
-library(tsibble)
-library(xts)
-library(timetk)
-crz_contracts_size_distribution_tsbl <- as_tsibble(crz_contracts_size_distribution_tbl) %>%
-  arrange(Date)
-
-
-crz_contracts_size_distribution_tsbl <- xts(crz_contracts_size_distribution_tsbl, order.by = Date)
-
-crz_contracts_size_distribution_tbl %>% plot_time_series(Date, .value = `Contract amount`)
-
-
-
 
 
 
 
 #test with data table
-library(data.table)
-crz_contracts_size_distribution_dt <- setDT(crz_contracts_size_distribution_tbl)
-dygraph(crz_contracts_size_distribution_dt) %>%
-  dyRangeSelector(dateWindow = c("2020-01-01", "2020-12-01"))
+#library(data.table)
+#crz_contracts_size_distribution_dt <- setDT(crz_contracts_size_distribution_tbl)
+#dygraph(crz_contracts_size_distribution_dt) %>%
+#  dyRangeSelector(dateWindow = c("2020-01-01", "2020-12-01"))
 
 
 
 
 # All time top 25(50?) contractors by quantity of contract->
-crz_top_contractors_by_quantity_db
+#crz_top_contractors_by_quantity_db
 
 crz_top_contractors_by_amount_db <- crz_contracts_full_db %>%
   group_by(contracting_authority_name) %>%
@@ -228,15 +214,18 @@ crz_top_contractors_by_amount_tbl <- crz_top_contractors_by_amount_tbl %>%
 
 
 # Top 25(50?) contractors by years. For each year: contractor, quantity of contracts, amount of contracts.
-crz_top_contractors_by_year
-
-
-crz_top_contractors_by_year_db
+#crz_top_contractors_by_year
 
 
 
 
-crz_contracts_selected_db <- select(crz_contracts_db,
+
+#crz_top_contractors_by_year_db
+
+
+
+
+crz_contracts_selected_db <- select(crz_contracts_full_db,
                                  contracting_authority_name,
                                  contracting_authority_formatted_address,
                                  contracting_authority_cin_raw,
@@ -255,7 +244,7 @@ crz_contracts_selected_db <- select(crz_contracts_db,
 )
 
 # Contracting autorities - most active
-crz_contr_auth_most_active_db <- crz_contracts_db %>%
+crz_contr_auth_most_active_db <- crz_contracts_full_db %>%
   group_by(contracting_authority_name) %>%
   summarise(Quantity = n(),
             ContractPrice = sum(contract_price_total_amount),
@@ -267,32 +256,29 @@ crz_contr_auth_most_active_db <- crz_contracts_db %>%
 crz_contr_auth_most_active_tbl <- as_tibble(crz_contr_auth_most_active_db)
 
 
-crz_contr_auth_most_active_tbl %>%
-ggplot( aes(x=ContractPrice)) +
-  stat_bin()
-
 
 
 
 
 # treemap
 library(treemap)
-treemap(crz_contr_auth_most_active_tbl,
-        index="contracting_authority_name",
-        vSize="Quantity",
-        type="index"
-)
+mytreemap <- treemap(
+  crz_contr_auth_most_active_tbl,
+  index="contracting_authority_name",
+  vSize="Quantity",
+  type="index"
+  )
+
+
+print(mytreemap)
+
+
+#ggplot(data = crz_contr_auth_most_active) +
+ # geom_bar(aes(contracting_authority_name))
 
 
 
 
-
-ggplot(data = crz_contr_auth_most_active) +
-  geom_bar(aes(contracting_authority_name))
-
-
-
-
-crz_contracts_selected_tibble <- as_tibble(crz_contracts_selected)
+#crz_contracts_selected_tibble <- as_tibble(crz_contracts_selected)
 
 

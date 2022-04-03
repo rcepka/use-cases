@@ -3,42 +3,56 @@ title: "crz"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
+    vertical_layout: scroll
 date: '2022-03-29'
 ---
 
-```{r = global, setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r, global, setup, file='crz.R', include=FALSE}
+#file='crz2'.R
 library(flexdashboard)
-library(knitr)
-#library(shiny)
 ```
 
-## ss
+## ss 
 
 ### ssss
 ```{r}
-valueBox(107, caption = "Trials", icon="fa-tag")
+flexdashboard::valueBox("55", caption = "Trials", icon="fa-tag")
+#kable(crz_contracts_summary_tbl)
+#knitr::kable(mtcars)
 ```
 
 ### sdds
 ```{r}
-valueBox("Ahoj", icon = "fa-comments")
+#knitr::kable(crz_contracts_summary_tbl)
+flexdashboard::valueBox(paste(crz_contracts_summary_tbl$ContractsAmount,"mil€", sep = ""), caption = "Total contracts", icon = "fa-comments")
 ```
 
 ### dfffrfrfr
 ```{r}
-valueBox(value = "Hi", icon = "fa-comments")
+flexdashboard::valueBox(value = "Hi", icon = "fa-comments")
 ```
 
 
 
-## Inputs and Outputs
+## Inputs and Outputs {.tabset}
 
 ### dfffrfrfr
 This R Markdown **document** is made *interactive* using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately.
+```{r}
 
-### dfffrfrfr
-To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+```
+
+> Monthly deaths from lung disease in the UK, 1974–1979
+
+### Treemap
+```{r}
+treemap(
+  crz_contr_auth_most_active_tbl,
+  index="contracting_authority_name",
+  vSize="Quantity",
+  type="index"
+  )
+```
 
 
 ## Inputs and Outputs
