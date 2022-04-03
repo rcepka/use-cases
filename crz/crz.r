@@ -13,6 +13,7 @@ library(treemap)
 
 # key_list("SK")
 
+#Set up DB connection
 con <- DBI::dbConnect(odbc::odbc(),
                       driver = "PostgreSQL Unicode",
                       database = "SK",
@@ -25,28 +26,63 @@ con <- DBI::dbConnect(odbc::odbc(),
 
 
 
+# Bring up the main DB table
 crz_contracts_full_db <- tbl(con, in_schema("crz", "contracts"))
 
 
-# dokonči, vyber hlavné stĺpce
-#crz_contracts_db <- select(crz_contracts_full_db)
 
-
+# The preview, some summary numbers ..
 # Total contracts, total sum, average contract size, highest contract,
-# most contracting entity, most contracted supplier,
+# most contracting entity, most contracted supplier, etc..
 crz_contracts_summary_db <- crz_contracts_full_db %>%
-  summarise(ContractsAmount = sum(contract_price_total_amount),
-            AverageContract = mean(contract_price_total_amount),
-            AllContractsQuantity = as.numeric(n()),
-            MinContract = min(contract_price_total_amount),
-            MaxContract = max(contract_price_total_amount, na.rm = TRUE),
-            Contractors = as.numeric(count(distinct(contracting_authority_cin_raw))),
-            Suppliers = as.numeric(count(distinct(supplier_cin_raw))),
-            MissingContractAmounts = as.numeric(count(is.na(contract_price_total_amount)))
-            )
-# make it tibble
+  summarise(
+    ContractsAmount = sum(contract_price_total_amount, na.rm = TRUE), # Total amount of all contracts
+    AverageContract = mean(contract_price_total_amount),# Average contract size
+    AllContractsQuantity = as.numeric(n()), # Number of all contracts
+    MinContract = min(contract_price_total_amount, na.rm = TRUE), # Minimal single contract size
+    MaxContract = max(contract_price_total_amount, na.rm = TRUE), # Maximal single contract size
+    Contractors = as.numeric(count(distinct(contracting_authority_cin_raw))), # Contractors quanti
+    Suppliers = as.numeric(count(distinct(supplier_cin_raw))), # Suppliers quantity
+    MissingContractAmounts = as.numeric(count(is.na(contract_price_total_amount)))
+    )
+
+# make it tibble, bring the table into R
 crz_contracts_summary_tbl <- as_tibble(crz_contracts_summary_db)
 
+
+
+
+# Top ?50? contracts of all the time
+crz_top_contracts_db <- crz_contracts_full_db %>%
+  select(
+    contracting_authority_name,
+    supplier_name,
+    subject,
+    effective_from,
+    contract_price_total_amount
+  ) %>%
+  slice_max(contract_price_total_amount, n = 5) %>%
+  arrange(desc(contract_price_total_amount)
+  )
+
+# Make it tibble
+crz_top_contracts_tbl <- as_tibble(crz_top_contracts_db)
+
+
+
+# bar plot test
+ggplot(crz_top_contracts_tbl, aes(x=supplier_name, y=contract_price_total_amount)) +
+  geom_bar(stat = "identity") +
+  coord_flip()+
+  theme_bw()
+
+
+# display table
+library(kableExtra)
+dt <- crz_top_contracts_tbl[1:5, 1:5]
+kbl(dt) %>%
+  kable_styling() %>%
+  kable_paper("hover", full_width = F)
 
 
 
@@ -112,14 +148,33 @@ crz_contracts_size_distribution_tbl <- as_tibble(crz_contracts_size_distribution
   ) %>%
   filter(
     between(Date, as.Date('1999-01-01'), as.Date('2023-01-01')),
-    `Contract amount` > 0
+    `Contract amount` > 1000
     )
 
+# basic histogram
+p <- ggplot(crz_contracts_size_distribution_tbl[1:100,], aes(x=`Contract amount`)) +
+  stat_bin(breaks=seq(0,1000,100), fill="#69b3a2", color="#e9ecef", alpha=0.9)
+p
 
 
-ggplot(data = crz_contracts_size_distribution_tbl, mapping = aes(x = Date, y = "Contract amount")) +
+ggplot(data = crz_contracts_size_distribution_tbl, mapping = aes(x = Date, y = `Contract amount`)) +
   geom_line()
 
+ggplot(data=crz_contracts_size_distribution_tbl, aes(x=Date, y=`Contract amount`)) +
+  geom_bar(stat="identity")
+
+
+library(dygraphs)
+library(tsibble)
+library(xts)
+library(timetk)
+crz_contracts_size_distribution_tsbl <- as_tsibble(crz_contracts_size_distribution_tbl) %>%
+  arrange(Date)
+
+
+crz_contracts_size_distribution_tsbl <- xts(crz_contracts_size_distribution_tsbl, order.by = Date)
+
+crz_contracts_size_distribution_tbl %>% plot_time_series(Date, .value = `Contract amount`)
 
 
 
@@ -127,7 +182,11 @@ ggplot(data = crz_contracts_size_distribution_tbl, mapping = aes(x = Date, y = "
 
 
 
-
+#test with data table
+library(data.table)
+crz_contracts_size_distribution_dt <- setDT(crz_contracts_size_distribution_tbl)
+dygraph(crz_contracts_size_distribution_dt) %>%
+  dyRangeSelector(dateWindow = c("2020-01-01", "2020-12-01"))
 
 
 
