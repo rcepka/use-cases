@@ -9,16 +9,12 @@ output:
       bootswatch: minty
 ---
 
-
 ```{r, global,setup, file=c('common/crz_db_con.R', 'crz_summary.R'), include=FALSE}
 library(flexdashboard)
 ```
 
 
-
-
-## sds
-
+## First row
 
 ### Total contracts amount
 ```{r}
@@ -35,12 +31,12 @@ flexdashboard::valueBox(crz_contracts_summary_tbl$AllContractsQuantity, caption 
 flexdashboard::valueBox(paste(crz_contracts_summary_tbl$AverageContract,"€", sep = ""), caption = "Priemerná hodnota kontraktu", icon = "fa-comments")
 ```
 
-## sds
-
 ### Biggest contract amount
 ```{r}
 flexdashboard::valueBox(paste(crz_contracts_summary_tbl$MaxContract, "mld€", sep = ""), caption = "Najväčší kontrakt", icon="fa-tag")
 ```
+
+## Second row
 
 ### contractors quantity
 ```{r}
@@ -56,23 +52,4 @@ flexdashboard::valueBox(crz_contracts_summary_tbl$Suppliers, caption = "Počet d
 ```{r}
 flexdashboard::valueBox(paste(crz_contracts_summary_tbl$RecordsNo, "(tis)", sep = ""), caption = "Počet zmlúv", icon = "fa-comments")
 ```
-
-
-
-## ok 
-
-### dfffrfrfr
-```{r}
-flexdashboard::valueBox(crz_contracts_summary_tbl$AllContractsQuantity, icon = "fa-comments")
-```
-
-
-### Treemap
-```{r}
-```
-
-norm. tesxt
-ssdddd
-
-> Tabuľka dát z ktorých vychádzame
 
