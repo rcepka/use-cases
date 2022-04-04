@@ -25,7 +25,6 @@ crz_contracts_summary_db <- crz_contracts_full_db %>%
     MaxContract = round(max(contract_price_total_amount, na.rm = TRUE) / 1000000000, digits = 1), # Maximal single contract size in mld €
     Contractors = as.numeric(count(distinct(contracting_authority_cin_raw))), # Contractors quanti
     Suppliers = as.numeric(count(distinct(supplier_cin_raw))), # Suppliers quantity
-    RecordsNo = as.numeric(n()), # quantity of contracts
     MissingContractAmounts = as.numeric(count(is.na(contract_price_total_amount)))
     )
 
