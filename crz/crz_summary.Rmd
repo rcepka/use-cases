@@ -47,10 +47,3 @@ flexdashboard::valueBox(crz_contracts_summary_tbl$Contractors, caption = "Počet
 ```{r}
 flexdashboard::valueBox(crz_contracts_summary_tbl$Suppliers, caption = "Počet dodávateľov", icon = "fa-comments")
 ```
-
-
-
-## Third row
-
-### Some content
-fo rexample table
