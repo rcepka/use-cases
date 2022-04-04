@@ -152,16 +152,16 @@ crz_contracts_size_distribution_tbl <- as_tibble(crz_contracts_size_distribution
     )
 
 # basic histogram
-p <- ggplot(crz_contracts_size_distribution_tbl[1:100,], aes(x=`Contract amount`)) +
-  stat_bin(breaks=seq(0,1000,100), fill="#69b3a2", color="#e9ecef", alpha=0.9)
-p
-
-
-ggplot(data = crz_contracts_size_distribution_tbl, mapping = aes(x = Date, y = `Contract amount`)) +
-  geom_line()
-
-ggplot(data=crz_contracts_size_distribution_tbl, aes(x=Date, y=`Contract amount`)) +
-  geom_bar(stat="identity")
+# p <- ggplot(crz_contracts_size_distribution_tbl[1:100,], aes(x=`Contract amount`)) +
+#   stat_bin(breaks=seq(0,1000,100), fill="#69b3a2", color="#e9ecef", alpha=0.9)
+# p
+#
+#
+# ggplot(data = crz_contracts_size_distribution_tbl, mapping = aes(x = Date, y = `Contract amount`)) +
+#   geom_line()
+#
+# ggplot(data=crz_contracts_size_distribution_tbl, aes(x=Date, y=`Contract amount`)) +
+#   geom_bar(stat="identity")
 
 
 
@@ -180,25 +180,25 @@ ggplot(data=crz_contracts_size_distribution_tbl, aes(x=Date, y=`Contract amount`
 # All time top 25(50?) contractors by quantity of contract->
 #crz_top_contractors_by_quantity_db
 
-crz_top_contractors_by_amount_db <- crz_contracts_full_db %>%
-  group_by(contracting_authority_name) %>%
-  summarise(Quantity = as.numeric(n()),
-            ContractPrice = sum(contract_price_total_amount),
-            ContractAmount = sum(contract_price_amount)
-  ) %>%
-  slice_max(ContractAmount, n = 5)
-
-# Make it a tibble for further operations
-crz_top_contractors_by_amount_tbl <- as_tibble(crz_top_contractors_by_amount_db)
-
-crz_top_contractors_by_amount_tbl <- mutate(crz_top_contractors_by_amount_tbl, sum = sum(ContractPrice))
-
-add_row(crz_top_contractors_by_amount_tbl, contracting_authority_name = "All others", Quantity = as.numeric(crz_contracts_summary_tbl[1,2]) / 1000, ContractPrice = 555, ContractAmount = 666)
-
-
-crz_top_contractors_by_amount_tbl <- crz_top_contractors_by_amount_tbl %>%
-  rowwise() %>%
-  mutate(Percentage = ContractPrice / sum)
+# crz_top_contractors_by_amount_db <- crz_contracts_full_db %>%
+#   group_by(contracting_authority_name) %>%
+#   summarise(Quantity = as.numeric(n()),
+#             ContractPrice = sum(contract_price_total_amount),
+#             ContractAmount = sum(contract_price_amount)
+#   ) %>%
+#   slice_max(ContractAmount, n = 5)
+#
+# # Make it a tibble for further operations
+# crz_top_contractors_by_amount_tbl <- as_tibble(crz_top_contractors_by_amount_db)
+#
+# crz_top_contractors_by_amount_tbl <- mutate(crz_top_contractors_by_amount_tbl, sum = sum(ContractPrice))
+#
+# add_row(crz_top_contractors_by_amount_tbl, contracting_authority_name = "All others", Quantity = as.numeric(crz_contracts_summary_tbl[1,2]) / 1000, ContractPrice = 555, ContractAmount = 666)
+#
+#
+# crz_top_contractors_by_amount_tbl <- crz_top_contractors_by_amount_tbl %>%
+#   rowwise() %>%
+#   mutate(Percentage = ContractPrice / sum)
 
 
 

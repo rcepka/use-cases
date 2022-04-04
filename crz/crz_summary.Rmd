@@ -1,0 +1,78 @@
+---
+title: "To bude názov"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    theme: 
+      version: 4
+      bootswatch: minty
+---
+
+
+```{r, global,setup, file=c('common/crz_db_con.R', 'crz_summary.R'), include=FALSE}
+library(flexdashboard)
+```
+
+
+
+
+## sds
+
+
+### Total contracts amount
+```{r}
+flexdashboard::valueBox(paste(crz_contracts_summary_tbl$ContractsAmount, "mld€", sep = ""), caption = "Celková hodnota zmlúv", icon="fa-tag")
+```
+
+### Total contract quantity
+```{r}
+flexdashboard::valueBox(crz_contracts_summary_tbl$AllContractsQuantity, caption = "Celkový počet kontraktov", icon = "fa-comments")
+```
+
+### Average contract size
+```{r}
+flexdashboard::valueBox(paste(crz_contracts_summary_tbl$AverageContract,"€", sep = ""), caption = "Priemerná hodnota kontraktu", icon = "fa-comments")
+```
+
+## sds
+
+### Biggest contract amount
+```{r}
+flexdashboard::valueBox(paste(crz_contracts_summary_tbl$MaxContract, "mld€", sep = ""), caption = "Najväčší kontrakt", icon="fa-tag")
+```
+
+### contractors quantity
+```{r}
+flexdashboard::valueBox(crz_contracts_summary_tbl$Contractors, caption = "Počet zadávateľov", icon = "fa-comments")
+```
+
+### Suppliers quantity
+```{r}
+flexdashboard::valueBox(crz_contracts_summary_tbl$Suppliers, caption = "Počet dodávateľov", icon = "fa-comments")
+```
+
+### Number of contracts quantity
+```{r}
+flexdashboard::valueBox(paste(crz_contracts_summary_tbl$RecordsNo, "(tis)", sep = ""), caption = "Počet zmlúv", icon = "fa-comments")
+```
+
+
+
+## ok 
+
+### dfffrfrfr
+```{r}
+flexdashboard::valueBox(crz_contracts_summary_tbl$AllContractsQuantity, icon = "fa-comments")
+```
+
+
+### Treemap
+```{r}
+```
+
+norm. tesxt
+ssdddd
+
+> Tabuľka dát z ktorých vychádzame
+

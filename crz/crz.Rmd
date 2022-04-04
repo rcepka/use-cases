@@ -1,5 +1,5 @@
 ---
-title: "crz"
+title: ""
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -7,12 +7,12 @@ output:
 date: '2022-03-29'
 ---
 
-```{r, global, setup, file='crz.R', include=FALSE}
-#file='crz2'.R
+```{r, global,setup, file='common/crz_db_con.R', include=FALSE}
 library(flexdashboard)
 ```
 
-## ss 
+## Sumarizácia
+
 
 ### ssss
 ```{r}
@@ -34,7 +34,7 @@ flexdashboard::valueBox(value = "Hi", icon = "fa-comments")
 
 
 
-## Inputs and Outputs {.tabset}
+## Inputs and Outputs {data-height=650}
 
 ### dfffrfrfr
 This R Markdown **document** is made *interactive* using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately.
@@ -45,7 +45,7 @@ This R Markdown **document** is made *interactive* using Shiny. Unlike the more 
 > Monthly deaths from lung disease in the UK, 1974–1979
 
 ### Treemap
-```{r}
+```{r fig.height=8, fig.width=8}
 treemap(
   crz_contr_auth_most_active_tbl,
   index="contracting_authority_name",
