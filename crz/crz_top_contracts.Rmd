@@ -1,0 +1,102 @@
+---
+title: "Najväčšie kontrakty"
+always_allow_html: yes
+output:
+  flexdashboard::flex_dashboard:
+    number_sections: yes
+    orientation: rows
+    vertical_layout: scroll
+    theme:
+      version: 4
+      bootswatch: minty
+  word_document: default
+  pdf_document: default
+  word_document::word_document:
+    number_sections: true
+---
+
+```{r, global, setup, file=c('common/crz_db_con.R', 'crz_top_contracts.R'), include=FALSE}
+library(flexdashboard)
+library(knitr)
+library(treemap)
+library(DT)
+library(stringr)
+```
+
+## First row {.tabset}
+
+### Another chart {data-height="650"}
+
+```{r attr.source="style='display:inline-block;'", collapse=TRUE}
+1:10  # a sequence from 1 to 10
+10:1  # in the reverse order
+```
+
+date: "`r Sys.Date()`"
+
+date: `r Sys.Date()`
+
+```{r class.source="bg-danger", class.output="bg-success"}
+mtcars[1:5, "mpg", drop = FALSE]
+```
+
+
+### Treemap
+
+```{r, out.width="4", fig.height=4, fig.cap = "An amazing plot"}
+treemap(
+  crz_top_contracts_tbl_basic,
+  index="Subject",
+  vSize="Amount",
+  type="index"
+)
+```
+
+## Second row
+
+### Biggest contract amount
+
+```{r}
+x <- 54
+```
+
+some text here `r x`
+
+\newpage
+
+## Row
+
+### Data table {data-height="800"}
+
+nejaký text
+
+```{r}
+crz_top_contracts_tbl_basic$Subject <- str_trunc(crz_top_contracts_tbl_basic$Subject, 75, side = "right", ellipsis = "...")
+DT::datatable(crz_top_contracts_tbl_basic)
+```
+
+> dasas ssas
+
+## Another row with table
+
+### Table
+
+here will be Knitr table
+
+> here will be Knitr table
+
+```{r}
+knitr::kable(crz_top_contracts_tbl_basic)
+```
+
+## third row {data-height="650"}
+
+### Poznámka
+
+Pridaj sem ešte dynamický graf zobrazovania týchto údajov podľa rokov, možnosť prepínania; cez Shiny
+
+```{r}
+options(width = 60)
+matrix(runif(100), ncol = 20)
+```
+
