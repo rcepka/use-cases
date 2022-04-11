@@ -9,94 +9,61 @@ output:
     theme:
       version: 4
       bootswatch: minty
-  word_document: default
-  pdf_document: default
-  word_document::word_document:
-    number_sections: true
 ---
 
-```{r, global, setup, file=c('common/crz_db_con.R', 'crz_top_contracts.R'), include=FALSE}
+```{r}
+# file=c('common/crz_db_con.R', 'crz_top_contracts.R')
+#
+# setwd("D:/R/Projects/Web/use-cases/crz")
+#source('common/crz_db_con.R', local = knitr::knit_global())
+#source('crz_top_contracts.R', local = knitr::knit_global())
+```
+
+
+
+```{r, global, setup, include=FALSE}
 library(flexdashboard)
 library(knitr)
-library(treemap)
 library(DT)
 library(stringr)
+library(dplyr)
+#load("data/crz_top_contracts_100_basic.Rdata")
+load("data/crz_top_contracts_100.Rdata")
 ```
 
 ## First row {.tabset}
 
-### Another chart {data-height="650"}
+### Table 
 
-```{r attr.source="style='display:inline-block;'", collapse=TRUE}
-1:10  # a sequence from 1 to 10
-10:1  # in the reverse order
-```
-
-date: "`r Sys.Date()`"
-
-date: `r Sys.Date()`
-
-```{r class.source="bg-danger", class.output="bg-success"}
-mtcars[1:5, "mpg", drop = FALSE]
-```
-
-
-### Treemap
-
-```{r, out.width="4", fig.height=4, fig.cap = "An amazing plot"}
-treemap(
-  crz_top_contracts_tbl_basic,
-  index="Subject",
-  vSize="Amount",
-  type="index"
-)
-```
-
-## Second row
-
-### Biggest contract amount
 
 ```{r}
-x <- 54
+library(kableExtra)
+#crz_top_contracts_100$Subject <- str_trunc(crz_top_contracts_100$Subject, 75, "right")
+crz_top_contracts_100[1:25,] %>%
+  select(Contract.ID, Contractor, Supplier, Subject, Price) %>%
+  rename("Contract ID" = Contract.ID,
+         "Price[m€]" = Price) %>%
+  mutate(
+    Contractor = str_trunc(Contractor, 40, "right"),
+    Supplier = str_trunc(Supplier, 40, "right"),
+    Subject = str_trunc(Subject, 40, "right")
+   ) %>%
+  kbl(align = "llllc") %>%
+  kable_classic(full_width = F, html_font = "Cambria", bootstrap_options = c("condensed", "hover", "striped"), position = "left") %>%
+  column_spec(5, color = "white", background = spec_color(mtcars$drat[1:8], end = 0.7))
 ```
 
-some text here `r x`
 
-\newpage
 
-## Row
 
-### Data table {data-height="800"}
+### Treemap Chart
 
-nejaký text
-
-```{r}
-crz_top_contracts_tbl_basic$Subject <- str_trunc(crz_top_contracts_tbl_basic$Subject, 75, side = "right", ellipsis = "...")
-DT::datatable(crz_top_contracts_tbl_basic)
-```
-
-> dasas ssas
-
-## Another row with table
-
-### Table
-
-here will be Knitr table
-
-> here will be Knitr table
-
-```{r}
-knitr::kable(crz_top_contracts_tbl_basic)
-```
-
-## third row {data-height="650"}
-
-### Poznámka
-
-Pridaj sem ešte dynamický graf zobrazovania týchto údajov podľa rokov, možnosť prepínania; cez Shiny
-
-```{r}
-options(width = 60)
-matrix(runif(100), ncol = 20)
+```{r fig.width=12, fig.height=10, fig.cap = "An amazing plot"}
+library(treemap)
+ # treemap(
+ #   crz_top_contracts_100_basic,
+ #   index="Subject",
+ #   vSize="Price",
+ #   type="index")
 ```
 

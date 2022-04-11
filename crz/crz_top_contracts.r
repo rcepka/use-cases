@@ -5,6 +5,7 @@ library(tidyverse)
 library(dbplyr)
 library(ggplot2)
 library(treemap)
+library(kableExtra)
 #library(RPostgreSQL)
 
 
@@ -37,7 +38,7 @@ crz_contracts_full_db <- tbl(con, in_schema("crz", "contracts"))
 # Top/largest contracts of all the time
 crz_top_contracts_db <- crz_contracts_full_db %>%
   select(
-    id,
+    #id,
     contract_identifier,
     contracting_authority_name,
     contracting_authority_cin_raw,
@@ -47,43 +48,86 @@ crz_top_contracts_db <- crz_contracts_full_db %>%
     effective_from,
     contract_price_total_amount
   ) %>%
-  slice_max(contract_price_total_amount, n = 50)
+  rename(
+    #ID = id,
+    Contract.ID = contract_identifier,
+    Contractor = contracting_authority_name,
+    Contractor.Cin = contracting_authority_cin_raw,
+    Supplier = supplier_name,
+    Supplier.Cin = supplier_cin_raw,
+    Subject = subject,
+    Effective.From = effective_from,
+    Price = contract_price_total_amount
+  ) %>%
+  mutate(
+    #Price = paste(round(Price / 1000000, digits = 1), "€", sep = "") # Make it in millions of €
+    Price = round(Price / 1000000, digits = 1) # Make it in millions of €
+  )
+
+# Create basic table according to the number of top contracts
+crz_top_contracts_100_db <- slice_max(crz_top_contracts_db, Price, n = 100)
+crz_top_contracts_1000_db <- slice_max(crz_top_contracts_db, Price, n = 1000)
+
 
 
 # Make it tibble
-crz_top_contracts_tbl <- as_tibble(crz_top_contracts_db)
+crz_top_contracts_100 <- as_tibble(crz_top_contracts_100_db)
+
 
 
 # Remove duplicates, arrange, remove NA´s
-crz_top_contracts_tbl %>%
-  distinct(contract_identifier, .keep_all = TRUE) %>%
-  filter(!is.na(effective_from)) %>%
-  arrange(desc(contract_price_total_amount))
+crz_top_contracts_100 <- crz_top_contracts_100 %>%
+  distinct(Contract.ID, .keep_all = TRUE) %>%
+  filter(!is.na(Effective.From)) %>%
+  arrange(desc(Price))
+
+# Save the data to file
+save(crz_top_contracts_100, file = "data/crz_top_contracts_100.Rdata")
+
+
+
+table1 <- crz_top_contracts_100 %>%
+  select(Contract.ID, Contractor, Supplier, Subject, Price) %>%
+  rename("Contract ID" = Contract.ID) %>%
+  mutate(
+    Contractor = str_trunc(Contractor, 40, "right"),
+    Supplier = str_trunc(Supplier, 40, "right"),
+    Subject = str_trunc(Subject, 40, "right"),
+    Price = paste(Price, "€", sep = "")) %>%
+  #arrange(desc(Price)) %>%
+  #slice_max(Price, n = 25) %>%
+  kbl() %>%
+  kable_classic(full_width = F, html_font = "Cambria", bootstrap_options = c("condensed", "hover", "striped"), position = "left") %>%
+  row_spec(2:3, color = 'white', background = 'black') %>%
+  add_header_above(c(" " = 1, "Group 1" = 2, "Group 2" = 2))
+
+
+
+
+
+
 
 
 # Select only basic info for TOP 25 contracts
-crz_top_contracts_tbl_basic <- crz_top_contracts_tbl %>%
+crz_top_contracts_100_basic <- crz_top_contracts_100 %>%
   select(
-    subject,
-    contract_price_total_amount
+    Subject,
+    Price
   ) %>%
-  mutate(
-    contract_price_total_amount = contract_price_total_amount / 1000000 #make it milllions of €
-  ) %>%
-  rename(
-    Subject = subject,
-    Amount = contract_price_total_amount
-  ) %>%
-  slice_max(Amount, n = 25) %>%
-  arrange(desc(Amount))
+  slice_max(Price, n = 25) %>%
+  arrange(desc(Price))
 
-#crz_top_contracts_tbl_basic <- as_tibble(crz_top_contracts_db_basic)
+# Save the data to file
+save(crz_top_contracts_100_basic, file = "data/crz_top_contracts_100_basic.Rdata")
+
+
+#crz_top_contracts_100_basic <- as_tibble(crz_top_contracts_db_basic)
 
 
 
 #
 # # bar plot test
-# ggplot(crz_top_contracts_tbl, aes(x=supplier_name, y=contract_price_total_amount)) +
+# ggplot(crz_top_contracts_100, aes(x=supplier_name, y=contract_price_total_amount)) +
 #   geom_bar(stat = "identity") +
 #   coord_flip()+
 #   theme_bw()
@@ -91,7 +135,7 @@ crz_top_contracts_tbl_basic <- crz_top_contracts_tbl %>%
 #
 # # display table
 # #library(kableExtra)
-# #dt <- crz_top_contracts_tbl[1:5, 1:5]
+# #dt <- crz_top_contracts_100[1:5, 1:5]
 # #kbl(dt) %>%
 #  # kable_styling() %>%
 #   #kable_paper("hover", full_width = F)
