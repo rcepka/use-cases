@@ -15,11 +15,9 @@ output:
 # file=c('common/crz_db_con.R', 'crz_top_contracts.R')
 #
 # setwd("D:/R/Projects/Web/use-cases/crz")
-#source('common/crz_db_con.R', local = knitr::knit_global())
-#source('crz_top_contracts.R', local = knitr::knit_global())
+source('common/crz_db_con.R', local = knitr::knit_global())
+source('crz_top_contracts.R', local = knitr::knit_global())
 ```
-
-
 
 ```{r, global, setup, include=FALSE}
 library(flexdashboard)
@@ -27,17 +25,18 @@ library(knitr)
 library(DT)
 library(stringr)
 library(dplyr)
+library(plotly)
+library(treemap)
+library(kableExtra)
 #load("data/crz_top_contracts_100_basic.Rdata")
-load("data/crz_top_contracts_100.Rdata")
+#load("data/crz_top_contracts_100.Rdata")
 ```
 
-## First row {.tabset}
+## First row {.tabset} 
 
-### Table 
-
+### Table {data-height=650px}
 
 ```{r}
-library(kableExtra)
 #crz_top_contracts_100$Subject <- str_trunc(crz_top_contracts_100$Subject, 75, "right")
 crz_top_contracts_100[1:25,] %>%
   select(Contract.ID, Contractor, Supplier, Subject, Price) %>%
@@ -50,20 +49,94 @@ crz_top_contracts_100[1:25,] %>%
    ) %>%
   kbl(align = "llllc") %>%
   kable_classic(full_width = F, html_font = "Cambria", bootstrap_options = c("condensed", "hover", "striped"), position = "left") %>%
-  column_spec(5, color = "white", background = spec_color(mtcars$drat[1:8], end = 0.7))
+  column_spec(5, color = "white", background = spec_color(mtcars$drat[1:8], end = 0.7)) %>%
+  scroll_box(width = "100%", height = "100%")
 ```
-
-
-
 
 ### Treemap Chart
 
-```{r fig.width=12, fig.height=10, fig.cap = "An amazing plot"}
-library(treemap)
- # treemap(
- #   crz_top_contracts_100_basic,
- #   index="Subject",
- #   vSize="Price",
- #   type="index")
+```{r out.width="100%"}
+fig <- plot_ly(crz_top_contracts_100[1:25,],
+    type="treemap",
+    labels=~Subject,
+    parents=NA,
+    values = ~Price,
+    hovertemplate = "Ingredient: %{label}<br>Count: %{value} mil.€<br>Percentá: %{total}<extra></extra>",
+    textinfo="percent"
+)
+fig
 ```
 
+### Treemap Chart 2
+
+```{r fig.width=10}
+treemap(crz_top_contracts_100[1:25,], #Your data frame object
+        index = "Subject",  #A list of your categorical variables
+        vSize = "Price",  #This is your quantitative variable
+        type="index", #Type sets the organization and color scheme of your treemap
+        palette = "Reds",  #Select your color palette from the RColorBrewer presets or make your own.
+        title="Top 25 kontraktov", #Customize your title
+        fontsize.title = 14 #Change the font size of the title
+        )
+```
+
+```{r}
+library(rbokeh)
+figure() %>%
+  ly_bar(crz_top_contracts_100, x = Price, y = Subject) %>%
+  theme_axis("x", major_label_orientation = 90)
+```
+
+##  {.unnumbered}
+
+<h1>
+
+Top 25 objednávateľov - podľa počtu zmlôv
+
+</h1>
+
+## Top Contarctors {.tabset}
+
+
+### Table
+```{r}
+crz_top_contractors_by_quantity[1:25,] %>%
+  kbl(align = "llllc") %>%
+  kable_classic(full_width = F, html_font = "Cambria", bootstrap_options = c("condensed", "hover", "striped"), position = "left") %>%
+  scroll_box(width = "100%", height = "100%")
+```
+
+
+
+
+### Plot
+
+
+
+
+
+## {-}
+
+
+<h1>
+
+Top 25 dodávateľov - podľa počtu zmlôv
+
+</h1>
+
+
+## Top Contarctors {.tabset}
+
+
+### Table
+```{r}
+crz_top_suppliers_by_quantity[1:25,] %>%
+  kbl(align = "llllc") %>%
+  kable_classic(full_width = F, html_font = "Cambria", bootstrap_options = c("condensed", "hover", "striped"), position = "left") %>%
+  scroll_box(width = "100%", height = "100%")
+```
+
+
+
+
+### Plot

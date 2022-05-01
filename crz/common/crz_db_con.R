@@ -1,5 +1,4 @@
 
-library(tidyverse)
 library(dbplyr)
 library(DBI)
 library(odbc)
@@ -10,7 +9,7 @@ library(keyring)
 # key_list("SK")
 
 #Set up DB connection
-con <- DBI::dbConnect(odbc::odbc(),
+con_SK <- DBI::dbConnect(odbc::odbc(),
                       driver = "PostgreSQL Unicode",
                       database = "SK",
                       UID    = keyring::key_list("SK")[1,2],
@@ -19,3 +18,16 @@ con <- DBI::dbConnect(odbc::odbc(),
                       #encoding = "latin1",
                       encoding = "Windows-1250",
                       port = 5432)
+
+
+
+#Set up DB connection
+con_test <- DBI::dbConnect(odbc::odbc(),
+                         driver = "PostgreSQL Unicode",
+                         database = "test",
+                         UID    = keyring::key_list("test")[1,2],
+                         PWD    = keyring::key_get("test", key_list("test")[1,2]),
+                         host = "localhost",
+                         #encoding = "latin1",
+                         encoding = "Windows-1250",
+                         port = 5432)
