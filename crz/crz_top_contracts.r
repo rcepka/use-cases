@@ -9,6 +9,7 @@ library(kableExtra)
 library(lubridate)
 library(ggforce)
 library(here)
+library(hrbrthemes)
 #library(RPostgreSQL)
 
 
@@ -91,6 +92,7 @@ crz_top_contracts <- crz_top_contracts %>%
   )
 
 #save(crz_top_contracts, file = here("crz", "data", "crz_top_contracts.Rdata"))
+# Note: generates large file
 
 
 
@@ -100,6 +102,12 @@ crz_top_contracts <- crz_top_contracts %>%
 
 # crz_top_contracts_db$Date <- str_replace(crz_top_contracts_db$Date, "^\\d{2}", "99")
 # crz_top_contracts_db$Date <- paste(str_sub(crz_top_contracts_db$Date, 1, 2) <- "99", str_sub(crz_top_contracts_db$Date, 3,-1L), sep = "")
+
+
+
+
+
+
 
 
 
@@ -119,6 +127,17 @@ crz_top_contracts_by_years <- crz_top_contracts %>%
   arrange(
     Date.Year
   )
+# Change Date.Year to class Date
+crz_top_contracts_by_years <- crz_top_contracts_by_years %>%
+  mutate(
+    Date.Year = ymd(Date.Year, truncated = 2L) # Make sure that it is of class Date
+  )
+
+
+# For converting numbers to Slovak month names
+slovak_months <- c("január", "február", "marec", "apríl",
+                   "máj", "jún", "júl", "august",
+                   "september", "október", "november", "december")
 
 # Summaries by Years and Months
 crz_top_contracts_by_years_months <- crz_top_contracts %>%
@@ -139,30 +158,313 @@ crz_top_contracts_by_years_months <- crz_top_contracts %>%
     Date.Year,
     Date.Month
   )
+crz_top_contracts_by_years_months <- crz_top_contracts_by_years_months %>%
+  mutate(
+    Date.Year = ymd(Date.Year, truncated = 2L), # Make sure that it is of class Date
+    Date.Month.Chr = slovak_months[Date.Month]
+  ) %>%
+  relocate(
+    Date.Month.Chr, .after = Date.Month
+  )
 
-# And some plot
-ggplot(crz_top_contracts_by_years_months, aes(x= SUM, y = N, color = Date.Year)) +
-  geom_point(size = 3) +
-  geom_mark_hull(aes(filter = Date.Year == "2018", label = "Year 2018"))
+
+
+
+
+
 
 library(plotly)
-plot_ly(data = crz_top_contracts_by_years_months, x = ~SUM, y = ~N,
-               marker = list(size = 10,
-                             color = 'rgba(255, 182, 193, .9)',
-                             line = list(color = 'rgba(152, 0, 0, .8)',
-                                         width = 2)))
+plot_ly(data = crz_top_contracts_by_years_months,
+        x = ~SUM,
+        y = ~N,
+        size = ~N,
+        color = ~Date.Month
+        # marker = list(
+        #   #size = ~N,
+        #   color = 'rgba(255, 182, 193, .9)',
+        #   line = list(color = 'rgba(152, 0, 0, .8)',
+        #               width = 2
+        #               )
+        #   )
+        )
+
 
 plot_ly(data = crz_top_contracts_by_years_months, x = ~SUM, y = ~N, size = ~N, color = ~Date.Year)
 
 
 
+# Lollipop chart
+ggplot(
+  data = crz_top_contracts_by_years,
+  aes(
+    x = Date.Year,
+    y = N,
+    label = round(N/1000, 0)
+    )
+  ) +
+  # Plotting geom_segment() - lines
+  geom_segment(
+    aes(y = 0,  x = `Date.Year`,  yend = N, xend = `Date.Year`),
+    color = "darkorange",
+    size = 1.5,
+    alpha = 1
+    ) +
+  # Add geom_point()
+  geom_point(
+    stat = "identity",
+    color = "darkorange",
+    fill="orange", alpha=1, shape=21, stroke=2,
+    size = 15
+  ) +
+  #coord_flip() +
+  # Plotting geom_text()
+  geom_text(
+    color="white",
+    size=5,
+    fontface = "bold"
+    ) +
+  scale_y_continuous (
+    name = "Počet kontraktov v tisícoch",
+    limits = c(0, 100000),
+    n.breaks = 5,
+    labels = scales::label_number(
+      suffix = " k",
+      scale = (1 / 1000)
+      )
+  ) +
+  scale_x_date(
+    name = "Roky",
+    limits = c(as.Date("2012-01-01"), NA),
+    breaks = "1 year",
+    date_labels = "%Y",
+    guide = guide_axis()
+  ) +
+  labs(
+    title = "Počet kontraktov v CRZ",
+    subtitle = "Vývoj počtu kontraktov v jednotlivých rokoch",
+    caption = "Spracované DataViz"
+  ) +
+  theme_ipsum_rc(grid = "Y") +
+  theme(
+    axis.line.x = element_line(
+      color = "grey",
+      size = 0.5
+    ),
+    axis.line.y = element_line(
+      color = "grey",
+      size = 0.5
+    ),
+    panel.border = element_rect(
+      fill = "transparent",
+      color = "transparent"
+    ),
+    axis.title.x = element_text(
+        face = "bold",
+        size = rel(1.25)
+      ),
+    axis.title.y = element_text(
+      face = "bold",
+      size = rel(1.25)
+      ),
+    panel.grid.major = element_line(
+      size = 0.25,
+      color = "gray95"
+    )
+  )
 
 
 
 
+# Stacked area chart
+plot_crz_top_contracts_by_years_months2 <- crz_top_contracts_by_years_months %>%
+  mutate(
+    Date.Month = month.name[as.numeric(Date.Month)]
+    )
+  #mutate(Date.Month = factor(Date.Month, levels = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"))) %>%
+  ggplot(crz_top_contracts_by_years_months,
+         aes(x = Date.Year,
+             y = N,
+             #fill = Date.Month
+             label = N,
+             fill = month.name[as.numeric(Date.Month)]
+             )
+         ) +
+  geom_area(
+    alpha = 1, #position = "stack", #colour="white", size = 0.5
+    ) +
+  scale_x_date(
+   # name = "aaass",
+    date_breaks = "2 years",
+    date_labels = "%Y",
+    limits = c(as.Date("2012-01-01"), as.Date("2021-01-01"))
+    ) +
+  scale_y_continuous(
+    name = "bbfbfbaaass",
+    breaks = scales::breaks_extended(6),
+    #breaks = c(30000, 60000),
+    labels = scales::label_number(
+      suffix = " ",
+      big.mark = ",",
+      scale  = (1 / 1000)
+      )
+  ) +
+  theme_bw() +
+#  scale_fill_brewer(palette = "Spectral") +
+  labs(title="Area Chart of Returns Percentage",
+       subtitle="From Wide Data format",
+       caption="Source: Economics") +
+  annotate("label", x = as.Date("2020-01-01"), y = 80000, label = "asasasasa") +
+#geom_label(label = sum(crz_top_contracts_by_years_months$N)) +
+    # scale_fill_discrete(
+    #   breaks = c('January', 'February', 'March', 'April', "May", "June",
+    #              "July", "August", "September", "October", "November", "December")
+    #   ) +
+  theme(
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(color = "blue"),
+    panel.border = element_blank(),
+   # panel.grid = element_blank()
+  ) +
+  labs(
+    fill ="Mesiac",
+    #x = "qqqqq"
+    ) +
+    geom_line(aes(group = month.name[as.numeric(Date.Month)]), position = "stack") +
+    geom_point(aes(group = month.name[as.numeric(Date.Month)]), position = "stack", size = 2)
+
+###
+ggplot(data = crz_top_contracts_by_years_months) +
+  # Area chart
+  geom_area(
+    aes(
+      x = Date.Year,
+      y = N,
+      label = N,
+      fill = month.name[as.numeric(Date.Month)]
+      ),
+    alpha = 0.75, position = "stack", colour="white", size = 0.5
+    ) +
+  scale_x_date(
+    name = "Rok",
+    date_breaks = "2 years",
+    date_labels = "%Y",
+    limits = c(as.Date("2012-01-01"), as.Date("2021-01-01"))
+    ) +
+  scale_y_continuous(
+    name = "Počet kontraktov (v tisícoch)",
+    breaks = scales::breaks_extended(6),
+    #breaks = c(30000, 60000),
+    labels = scales::label_number(
+      suffix = "",
+      big.mark = ",",
+      scale  = (1 / 1000)
+      )
+    ) +
+  labs(title="Area Chart of Returns Percentage",
+       subtitle="From Wide Data format",
+       caption="Source: Economics") +
+  labs(
+    fill ="Mesiac",
+    #x = "qqqqq",
+    #y = "Ahoj"
+  ) +
+  theme_bw() +
+  theme(
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(color = "blue"),
+    panel.border = element_blank(),
+    #panel.grid = element_blank(),
+    panel.grid.major.x = element_blank()
+    ) +
+  # Line chart
+  geom_line(
+    aes(
+      x = Date.Year,
+      y = N,
+      group = month.name[as.numeric(Date.Month)]), position = "stack",
+    color = "red") +
+  # Points chart
+  geom_point(
+    aes(
+      x = Date.Year,
+      y = N,
+      group = month.name[as.numeric(Date.Month)]), position = "stack", size = 2,
+    color = "blue") +
+  # Text labels
+  stat_summary(fun = sum, aes(x = Date.Year, y = N, label = ..y.., group = Date.Year), geom = "text", vjust = -1)
+
+  stat_summary(
+    aes(
+      x = Date.Year,
+      y = N,
+    #  fun = "sum"
+    ),
+    fun.y = sum,
+    #label = N,
+    #geom = "text",
+    group = Date.Year
+  )
+  geom_text(data = crz_top_contracts_by_years,
+    aes(
+      x = Date.Year,
+      y = N,
+      label = paste(round(N / 1000, 0), "k"),
+      ),
+    # label.padding = 1.5,
+    #check_overlap = TRUE,
+    size = 3.5,
+    fontface = "bold",
+    #label.size = 5,
+    #show.legend = F
+    nudge_y = 1.51,
+   nudge_x = 2,
+    # angle = 45,
+   # stat = "identity",
+   # position = "identity",
+   vjust = -1
+    ) +
+  annotate("label",
+           x = as.Date("2013-01-01"),
+           y = 80000,
+           label = "asasasasa, sdsddsd dd
+           dsdd ddsdd",
+           #color = "white",
+           #fill = "red",
+           label.padding = unit(0.5, "lines"),
+           label.r = unit(0.15, "lines"),
+           label.size = 0.5,
+           )
+# scale_fill_discrete(
+#   breaks = c('January', 'February', 'March', 'April', "May", "June",
+#              "July", "August", "September", "October", "November", "December")
+#   )
+###
 
 
 
+
+library(lubridate)
+crz_top_contracts_by_years_months$Date.Year <- ymd(crz_top_contracts_by_years_months$Date.Year, truncated = 2L)
+
+
+
+ggplot(crz_top_contracts_by_years_months, aes(x = Date.Year, y = N, fill = Date.Month)) +
+  geom_area() +
+  scale_x_date(date_breaks = "2 years", date_labels = "%Y", limits = c(as.Date("2015-01-01"), NA))
+
+  # xlim(2011-01-01, 2022-01-01) +
+
+#, limits = c(2011-01-01, NA)
+
+
+crz_top_contracts_by_years$Date.Year <- ymd(crz_top_contracts_by_years$Date.Year, truncated = 2L)
+
+
+y <- unique(crz_top_contracts_by_years_months$Date.Year)
+yl <- year(y)
+brks <- crz_top_contracts_by_years$Date.Year[seq(1, length(crz_top_contracts_by_years$Date.Year), 12)]
+
+lbls <- year(brks)
 
 
 
