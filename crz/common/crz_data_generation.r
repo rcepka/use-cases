@@ -264,9 +264,10 @@ feather::write_feather(crz_top_contracts_1000, (here::here("crz", "data", "crz_t
 
 # ******************************************************************************
 # 6. Top contractors
-# Top contractors by total amount and contrct quantity
+# Top contractors by total amount and contract quantity
 # ******************************************************************************
 
+crz_all_contracts_db # Use the dataset with all contracts
 crz_top_contractors_all <- crz_all_contracts_cleaned %>%
   filter(
     Price > 0
