@@ -4,51 +4,107 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
-    theme: 
-      version: 4
-      bootswatch: minty
+    theme: bootstrap
+  runtime: shiny
 ---
 
-```{r, global,setup, file=c('common/crz_db_con.R', 'crz_summary.R'), include=FALSE}
+```{r, global, setup}
 library(flexdashboard)
+library(here)
+library(shiny)
+#file = source(here::here("crz", "common", "crz_db_con.R"), local = knitr::knit_global())
+file = source(here::here("crz", "crz_summary.R"), local = knitr::knit_global())
 ```
 
+# Page 1
 
-## First row
+## Row 1 {.sidebar}
+
+### Menu
+
+> Vyerte dátum
+
+```{r}
+selectInput( "n_breaks", label = "Number of bins:", choices = c(10, 20, 35, 50), selected = 20 )
+```
+
+## Row
 
 ### Total contracts amount
+
 ```{r}
-flexdashboard::valueBox(paste(crz_contracts_summary_tbl$ContractsAmount, "mld€", sep = ""), caption = "Celková hodnota zmlúv", icon="fa-tag")
+flexdashboard::valueBox(paste(crz_contracts_summary$Contracts.Amount, "mld€", sep = ""), caption = "Celková hodnota zmlúv", icon="fa-tag")
 ```
 
 ### Average contract size
+
 ```{r}
-flexdashboard::valueBox(paste(crz_contracts_summary_tbl$AverageContract,"€", sep = ""), caption = "Priemerná hodnota kontraktu", icon = "fa-comments")
+flexdashboard::valueBox(paste(crz_contracts_summary$Aver.Contract.Size,"€", sep = ""), caption = "Priemerná hodnota kontraktu", icon = "fa-comments")
 ```
+
+## Row
 
 ### Biggest contract amount
-```{r}
-flexdashboard::valueBox(paste(crz_contracts_summary_tbl$MaxContract, "mld€", sep = ""), caption = "Najväčší kontrakt", icon="fa-tag")
-```
 
-## Second row
+```{r}
+flexdashboard::valueBox(paste(crz_contracts_summary$Max.Contract.Size, "mld€", sep = ""), caption = "Najväčší kontrakt", icon="fa-tag")
+```
 
 ### Total contract quantity
+
 ```{r}
-flexdashboard::valueBox(crz_contracts_summary_tbl$AllContractsQuantity, caption = "Celkový počet kontraktov", icon = "fa-comments")
+flexdashboard::valueBox(crz_contracts_summary$Contracts.Quantity, caption = "Celkový počet kontraktov", icon = "fa-comments")
 ```
 
+## Row
+
 ### contractors quantity
+
 ```{r}
-flexdashboard::valueBox(crz_contracts_summary_tbl$Contractors, caption = "Počet zadávateľov", icon = "fa-comments")
+flexdashboard::valueBox(crz_contracts_summary$Contractors.Quantity, caption = "Počet zadávateľov", icon = "fa-comments")
 ```
 
 ### Suppliers quantity
+
 ```{r}
-flexdashboard::valueBox(crz_contracts_summary_tbl$Suppliers, caption = "Počet dodávateľov", icon = "fa-comments")
+flexdashboard::valueBox(crz_contracts_summary$Suppliers.Quantity, caption = "Počet dodávateľov", icon = "fa-comments")
 ```
 
-## third row
+# Zgroj dát
 
-### Poznámka
-Pridaj sem ešte dynamický graf zobrazovania týchto údajov podľa rokov, možnosť prepínania; cez Shiny
+## Riadok 1
+
+### Zdrojové dáta
+
+```{r fig_height=10}
+DT::datatable(crz_contracts_summary_flipped_sk) 
+```
+
+# Test
+
+## Riadok
+
+
+### Tu bude tabuľka
+
+sddsdsdsdsd
+
+
+
+```{r}
+library(kableExtra)
+crz_contracts_summary_flipped_sk %>%
+  kbl() %>%
+  kable_classic(full_width = F, position = "left", html_font = "Cambria")
+```
+
+### Tabuľka 2
+
+
+
+```{r}
+library(kableExtra)
+crz_contracts_summary_flipped_sk %>%
+  kbl() %>%
+  kable_classic(full_width = F, position = "left", html_font = "Cambria")
+```

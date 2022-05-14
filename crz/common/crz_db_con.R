@@ -1,9 +1,14 @@
 
-library(dbplyr)
-library(DBI)
-library(odbc)
-library(RPostgres)
-library(keyring)
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(
+  dbplyr,
+  DBI,
+  odbc,
+  RPostgres,
+  keyring
+  )
+
 #library(RPostgreSQL)
 
 # key_list("SK")
