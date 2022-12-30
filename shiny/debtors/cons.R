@@ -9,15 +9,6 @@ pacman::p_load(
 
 
 
-# Connect to a specific postgres database i.e. Heroku
-con <- dbConnect(RPostgres::Postgres(),
-                 dbname = 'vszp',
-                 host = 'e-vision.biz', # i.e. 'ec2-54-83-201-96.compute-1.amazonaws.com' / 135.181.152.233
-                 port = 5432, # or any other port specified by your DBA
-                 user = 'vszp',
-                 password = '789653')
-
-
 
 
 
