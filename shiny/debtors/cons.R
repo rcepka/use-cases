@@ -44,11 +44,27 @@ socpoist.debtors <- tbl(con_socpoist, "debtors")
 
 vszp.debtors <- vszp.debtors %>%
   select(name, address, city, cin, payer_type, amount, full_health_care_claim) %>%
-  mutate(source = "vszp")
+  mutate(source = "vszp") %>%
+  relocate(
+    amount, .after = name,
+  )
 
 socpoist.debtors <- socpoist.debtors %>%
   select(name, address, city, amount) %>%
-  mutate(source = "socpoist")
+  mutate(
+    source = "socpoist",
+    cin = as.numeric(NA),
+    payer_type = as.logical(NA),
+    full_health_care_claim = NA
+    ) %>%
+  relocate(amount, .after = name) %>%
+  relocate(source, .after = full_health_care_claim
+  )
+
+debtors.all <- bind_rows(vszp.debtors, socpoist.debtors)
+debtors.all <- union_all(vszp.debtors, socpoist.debtors, copy = TRUE)
+
+
 
 
 debtors.full.join <- vszp.debtors %>%
@@ -130,4 +146,8 @@ debtors.left.join
 
 
 
-vszp.debtors <- vszp.debtors %>%
+debtors.full.join %>% filter(is.na(address.vszp) & is.na(address.socpoist))
+
+debtors.full.join %>% filter(!is.na(amount.vszp) & !is.na(amount.socpoist))
+count(n())
+|
