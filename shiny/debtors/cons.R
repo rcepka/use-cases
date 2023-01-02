@@ -47,22 +47,46 @@ vszp.debtors <- vszp.debtors %>%
   mutate(source = "vszp") %>%
   relocate(
     amount, .after = name,
-  )
+  ) #%>% as_tibble()
 
 socpoist.debtors <- socpoist.debtors %>%
   select(name, address, city, amount) %>%
   mutate(
     source = "socpoist",
-    cin = as.numeric(NA),
-    payer_type = as.logical(NA),
-    full_health_care_claim = NA
+    cin = as.integer64(NA),
+    payer_type = NA,
+    full_health_care_claim = as.logical(NA)
     ) %>%
   relocate(amount, .after = name) %>%
   relocate(source, .after = full_health_care_claim
-  )
+  ) #%>% as_tibble()
+
+
+
+
+summary(comparedf(x = vszp.debtors, y = socpoist.debtors))
+comparedf(x = vszp.debtors, y = socpoist.debtors)
+diffdf(vszp.debtors, socpoist.debtors)
 
 debtors.all <- bind_rows(vszp.debtors, socpoist.debtors)
 debtors.all <- union_all(vszp.debtors, socpoist.debtors, copy = TRUE)
+
+debtors.all %>% count(n())
+
+debtors.all %>% collect()
+
+
+
+debtors.all.summary <- debtors.all %>%
+  group_by(name, city, source ) %>%
+  summarise(
+    count = n(),
+    sum.amount = sum(amount),
+    sum.vszp = sum(source == "vszp")
+  ) %>%
+  arrange( desc(count), desc(sum.amount)) %>% as_tibble()
+
+
 
 
 
@@ -80,9 +104,20 @@ debtors.full.join <- vszp.debtors %>%
     amount.socpoist = amount.y,
     city.vszp = city.x,
     city.socpoist = city.y,
-    cin.vszp = cin,
+    cin.vszp = cin.x,
+    cin.socpoist = cin.y
   ) %>%
-  relocate(source, .before = name)
+  relocate(source, .before = name) %>%
+  as_tibble()
+
+
+debtors.full.join2 <- debtors.full.join %>%
+  rowwise() %>%
+  mutate(
+    total = sum(amount.vszp,+ amount.socpoist, na.rm = TRUE),
+    bigger = pmax(amount.vszp, amount.socpoist, na.rm = TRUE)
+    )
+
 
 debtors.full.join.summarised <- debtors.full.join %>%
   group_by(source, name, address.vszp, address.socpoist, amount.vszp, amount.socpoist) %>%
@@ -95,7 +130,7 @@ debtors.full.join.summarised <- debtors.full.join %>%
   # arrange(desc(count), desc(bigger))
   arrange(desc(count), desc(pmax(amount.vszp, amount.socpoist)))
 
-
+_______
 
 
 
