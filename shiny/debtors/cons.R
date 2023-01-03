@@ -108,13 +108,19 @@ debtors.full.join <- vszp.debtors %>%
     cin.socpoist = cin.y
   ) %>%
   relocate(source, .before = name) %>%
-  as_tibble()
+  mutate(
+    amount.vszp = coalesce(amount.vszp, 0),
+    amount.socpoist = coalesce(amount.socpoist, 0),
+    total = amount.vszp + amount.socpoist,
+    bigger = pmax(amount.vszp, amount.socpoist)
+  ) %>%
+as_tibble()
 
 
 debtors.full.join2 <- debtors.full.join %>%
-  rowwise() %>%
+  #rowwise() %>%
   mutate(
-    total = sum(amount.vszp,+ amount.socpoist, na.rm = TRUE),
+    total = amount.vszp + amount.socpoist,
     bigger = pmax(amount.vszp, amount.socpoist, na.rm = TRUE)
     )
 
