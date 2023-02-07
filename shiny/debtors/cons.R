@@ -9,10 +9,41 @@ pacman::p_load(
 )
 
 
+# amazon test
+con_aws <- dbConnect(RPostgres::Postgres(),
+                      dbname = "postgres",
+                      host = "database-1.cj0gklq60nwo.us-east-1.rds.amazonaws.com",
+                      port = 5432,
+                      user = "postgres",
+                      password = "Rc789653")
+
+dbListTables(con_aws)
+accounts <- tbl(con_aws, "accounts")
+aws <- tbl(con_aws, "accounts")
+
+dbWriteTable(con_aws, "new", aws)
+
+aws <- as_tibble(aws)
+
+aws <- add_row(tibble_row(
+  user_id = 10,
+  username = "robo",
+  password = "123",
+  email = "sas@asas.sa",
+  created_on = as.numeric(as.POSIXct("1960-01-01", format="%Y-%m-%d")),
+  last_login =  as.numeric(as.POSIXct("1960-01-01", format="%Y-%m-%d"))
+
+))
+
+copy_to(
+  con_aws,
+  aws,
+  name = accounts
+) %>% show_query()
 
 
 
-
+aws
 
 con_vszp <- dbConnect(RPostgres::Postgres(),
                       dbname = "vszp",

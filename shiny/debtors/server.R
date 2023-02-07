@@ -8,19 +8,28 @@
 #
 
 library(shiny)
+library(DT)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
-    output$distPlot <- renderPlot({
+  dat <- reactive({
+    get(input$dataset, "package:datasets")
+  })
 
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
 
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
+  output$summary <- renderPrint({
+  #  dat <- get(input$dataset, "package:datasets")
+    summary(dat())
+  })
 
-    })
+  output$table <- renderTable({
+    #dats <- get(input$dataset, "package:datasets")
+    #dats <- as.data.frame(dats)
+    #dats
+    dat()
+  })
 
 })
+
+
