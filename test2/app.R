@@ -15,7 +15,8 @@ ui <- fluidPage(
            ),
 
     column(9,
-textOutput("o_text1")
+           textOutput("o_text1"),
+           textOutput("greeting")
            ),
 
     )
@@ -32,15 +33,16 @@ server <- function(input, output, session) {
       }
     )
 
-  output$o_text1 <- renderText(
+  output$o_text1 <- renderText({paste("Hello ", output1(), "")})
+
+  observeEvent(
+    input$action_button,
     {
+      message("Greeting performed")
+      }
+    )
 
-    paste("Hello ", output1(), "")
-
-
-
-  })
-
+  observeEvent(input$i_text1, {message("Text was inserted")})
 
 
 
