@@ -1,0 +1,31 @@
+/**
+#Visually hide column headers, but keep them accessible to screen reader users.
+#taken from here: https://github.com/glin/reactable/issues/102
+**/
+/**
+.hidden-column-headers .rt-thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+*/
+
+
+.Reactable .hidden-column-headers .rt-thead {
+   display: none !important;
+}
+
+.rt-thead .rt-th {
+  border-bottom: none;
+}
+
+.navbar.navbar-default {
+  --bs-navbar-padding-x: 0;
+  --bs-navbar-padding-y: 0 !important;
+  height:75px;
+}
