@@ -1,4 +1,3 @@
-
 FROM rcepka/shiny-verse:4.2.3
 
 
@@ -23,7 +22,7 @@ RUN apt-get update && \
 
 
 #COPY /app-chart /srv/shiny-server/app-chart
-COPY /app-map ./srv/shiny-server/app-map
+COPY /app ./srv/shiny-server/app
 #COPY /app-map ./app-map
 
 
@@ -60,11 +59,11 @@ COPY /app-map ./srv/shiny-server/app-map
 
 
 # expose port
-EXPOSE 3838 8787
+EXPOSE 3838
 #EXPOSE 3839
 
 
 # run app on container start
 #CMD ["R", "-e", "shiny::runApp('/srv/shiny-server/app-chart', host = '0.0.0.0', port = 3838)"]
-CMD ["R", "-e", "shiny::runApp('/srv/shiny-server/app-map', host = '0.0.0.0', port = 3838)"]
+CMD ["R", "-e", "shiny::runApp('/srv/shiny-server/app', host = '0.0.0.0', port = 3838)"]
 #CMD ["R", "-e", "shiny::runApp('/app-map', host = '0.0.0.0', port = 3838)"]

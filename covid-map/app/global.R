@@ -35,8 +35,8 @@ pacman::p_load(
 includeCSS("www/style.css")
 
 
-
-autoInvalidate <- reactiveTimer(60 * 60 * 24 * 1000, NULL)
+# refresh data every ...
+autoInvalidate <- reactiveTimer(1000 * 60 * 60 * 24 * 7, NULL)
 #autoInvalidate <- reactiveTimer(30000, NULL)
 
 
