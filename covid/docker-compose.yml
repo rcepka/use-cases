@@ -1,0 +1,19 @@
+version: "1"
+services:
+  covid-chart:
+    image: rcepka/use-cases_covid-chart:latest
+    container_name: covid-chart
+    ports:
+      - 12345:3838
+  covid-map:
+    image: rcepka/use-cases_covid-map:latest
+#    command: python3 app.py
+#    depends_on:
+#      - es
+    ports:
+      - 12346:3838
+#     volumes:
+#       - ./flask-app:/opt/flask-app
+# volumes:
+#   esdata1:
+#     driver: local
