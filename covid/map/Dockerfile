@@ -22,7 +22,7 @@ RUN apt-get update && \
 
 
 #COPY /app-chart /srv/shiny-server/app-chart
-COPY /app ./srv/shiny-server/app
+COPY /app ./srv/shiny-server/covid-map
 #COPY /app-map ./app-map
 
 
@@ -65,5 +65,5 @@ EXPOSE 3838
 
 # run app on container start
 #CMD ["R", "-e", "shiny::runApp('/srv/shiny-server/app-chart', host = '0.0.0.0', port = 3838)"]
-CMD ["R", "-e", "shiny::runApp('/srv/shiny-server/app', host = '0.0.0.0', port = 3838)"]
+CMD ["R", "-e", "shiny::runApp('/srv/shiny-server/covid-map', host = '0.0.0.0', port = 3838)"]
 #CMD ["R", "-e", "shiny::runApp('/app-map', host = '0.0.0.0', port = 3838)"]
