@@ -1,12 +1,14 @@
-version: "1"
+version: "3"
 services:
   covid-chart:
     image: rcepka/use-cases_covid-chart:latest
+    restart: always
     container_name: covid-chart
     ports:
       - 12345:3838
   covid-map:
     image: rcepka/use-cases_covid-map:latest
+    restart: always
 #    command: python3 app.py
 #    depends_on:
 #      - es
